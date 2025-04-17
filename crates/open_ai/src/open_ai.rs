@@ -394,11 +394,17 @@ pub async fn complete(
     request: Request,
 ) -> Result<Response> {
     let uri = format!("{api_url}/chat/completions");
-    let request_builder = HttpRequest::builder()
+    let mut request_builder = HttpRequest::builder()
         .method(Method::POST)
         .uri(uri)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", api_key));
+
+    if api_url.contains("openrouter.ai") {
+        request_builder = request_builder
+            .header("HTTP-Referer", "https://zed.dev/")
+            .header("X-Title", "Zed Editor");
+    }
 
     let mut request_body = request;
     request_body.stream = false;
@@ -447,11 +453,17 @@ pub async fn complete_text(
     request: CompletionRequest,
 ) -> Result<CompletionResponse> {
     let uri = format!("{api_url}/completions");
-    let request_builder = HttpRequest::builder()
+    let mut request_builder = HttpRequest::builder()
         .method(Method::POST)
         .uri(uri)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", api_key));
+
+    if api_url.contains("openrouter.ai") {
+        request_builder = request_builder
+            .header("HTTP-Referer", "https://github.com/zed-industries/zed")
+            .header("X-Title", "Zed Editor");
+    }
 
     let request = request_builder.body(AsyncBody::from(serde_json::to_string(&request)?))?;
     let mut response = client.send(request).await?;
@@ -534,11 +546,17 @@ pub async fn stream_completion(
     }
 
     let uri = format!("{api_url}/chat/completions");
-    let request_builder = HttpRequest::builder()
+    let mut request_builder = HttpRequest::builder()
         .method(Method::POST)
         .uri(uri)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", api_key));
+
+    if api_url.contains("openrouter.ai") {
+        request_builder = request_builder
+            .header("HTTP-Referer", "https://github.com/zed-industries/zed")
+            .header("X-Title", "Zed Editor");
+    }
 
     let request = request_builder.body(AsyncBody::from(serde_json::to_string(&request)?))?;
     let mut response = client.send(request).await?;
@@ -633,11 +651,19 @@ pub fn embed<'a>(
         input: texts.into_iter().collect(),
     };
     let body = AsyncBody::from(serde_json::to_string(&request).unwrap());
-    let request = HttpRequest::builder()
+    let mut request_builder = HttpRequest::builder()
         .method(Method::POST)
         .uri(uri)
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Authorization", format!("Bearer {}", api_key));
+
+    if api_url.contains("openrouter.ai") {
+        request_builder = request_builder
+            .header("HTTP-Referer", "https://github.com/zed-industries/zed")
+            .header("X-Title", "Zed Editor");
+    }
+
+    let request = request_builder
         .body(body)
         .map(|request| client.send(request));
 
